@@ -22,7 +22,13 @@ class TwitchChat extends HTMLElement {
   font-family: sans-serif;
   position: absolute;
   bottom: 10px;
-  width: 365px;
+  font-size: 200%;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  box-sizing: border-box;
+  justify-content: center;
+  width: 100vw;
 }
 
 .chat-line {
