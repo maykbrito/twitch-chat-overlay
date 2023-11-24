@@ -5,10 +5,6 @@ class TwitchChat extends HTMLElement {
     const shadow = this.attachShadow({ mode: 'open' })
     this.el = shadow
     shadow.appendChild(this.styles())
-
-    const [tmi, twemoji] = this.scripts()
-    shadow.appendChild(tmi)
-    shadow.appendChild(twemoji)
     shadow.appendChild(this.createChat())
   }
 
@@ -72,19 +68,6 @@ class TwitchChat extends HTMLElement {
     return style
   }
 
-  scripts() {
-    const tmi = document.createElement('script')
-
-    tmi.src =
-      'https://alca.sfo2.cdn.digitaloceanspaces.com/tmijs/1.4.2/tmi.min.js'
-
-    const twemoji = document.createElement('script')
-
-    twemoji.src = 'https://twemoji.maxcdn.com/2/twemoji.min.js?2.3.0'
-
-    return [tmi, twemoji]
-  }
-
   createChat() {
     /* Helpful information:
 
@@ -113,7 +96,7 @@ Clips
       urlTemplate: '//cdn.betterttv.net/emote/{{id}}/{{image}}'
     }
 
-    const krakenBase = 'https://api.twitch.tv/kraken/'
+    const krakenBase = 'https://api.twitch.tv/helix/'
     const krakenClientID = '4g5an0yjebpf93392k4c5zll7d7xcec'
 
     const chatFilters = [
@@ -143,42 +126,19 @@ Clips
     let client
     let testing = true
 
-    if (testing) {
-      kraken({
-        endpoint: 'streams',
-        qs: {
-          limit: 10,
-          language: 'en'
-        }
-      }).then(({ streams }) => {
-        client = new tmi.client({
-          // options: { debug: true },
-          connection: {
-            reconnect: true,
-            secure: true
-          },
+    client = new tmi.client({
+      // options: { debug: true },
+      connection: {
+        reconnect: true,
+        secure: true
+      },
 
-          channels: chatchannel
-          //channels: [ 'geocym','VRFlad','Casual_ObserVR','lyfesaver74' ],
-          //channels: streams.map(n => n.channel.name)
-        })
-        addListeners()
-        client.connect()
-      })
-    } else {
-      client = new tmi.client({
-        // options: { debug: true },
-        connection: {
-          reconnect: true,
-          secure: true
-        },
+      channels: chatchannel
+    })
 
-        channels: ['alca']
-      })
+    addListeners()
+    client.connect()
 
-      addListeners()
-      client.connect()
-    }
 
     function addListeners() {
       client.on('connecting', () => {
@@ -336,9 +296,10 @@ Clips
             twitchBadgeCache.data.global,
             twitchBadgeCache.data[chan] || {}
           )
-          let badges = Object.keys(data.badges).forEach(type => {
+          Object.keys(data.badges).forEach(type => {
             let version = data.badges[type]
             let group = badgeGroup[type]
+            console.log(badgeGroup)
             if (group && version in group.versions) {
               let url = group.versions[version].image_url_1x
               let ele = document.createElement('img')
@@ -566,7 +527,7 @@ Clips
         global = false
       }
       return request({
-        base: 'https://api.betterttv.net/2/',
+        base: 'https://api.betterttv.net/3/',
         endpoint
       }).then(({ emotes, status, urlTemplate }) => {
         if (status === 404) return
